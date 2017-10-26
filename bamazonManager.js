@@ -31,6 +31,8 @@ function start(){
 			lowInventory();
 		}else if (userAnswer.options === "Add new product"){
 			addNewProduct();
+		}else if (userAnswer.options === "Increase inventory"){
+			increaseInventory();
 		}
 	});
 }
@@ -67,3 +69,46 @@ function lowInventory(){
 		connection.end();
 	});
 }
+
+function addNewProduct(){
+	inquirer
+        .prompt([{
+                name: "productName",
+                type: "input",
+                message: "What product is being added?"
+            },
+            {
+                name: "department",
+                type: "input",
+                message: "What department?"
+            },
+            {
+                name: "price",
+                type: "input",
+                message: "What is the price?"
+            },
+            {
+                name: "stock",
+                type: "input",
+                message: "How many are in inventory?"
+            }
+        ])
+        .then(function(answer) {
+            // when finished prompting, insert a new item into the db with that info
+            connection.query(
+                "INSERT INTO products SET ?", {
+                    product_name: answer.productName,
+                    department_name: answer.department,
+                    price: answer.price,
+                    stock_quantity: answer.stock
+                },
+                function(err) {
+                    if (err) throw err;
+                    console.log("Your product inventory is created successfully!");
+                    connection.end();
+                }
+            );
+        });
+
+}
+
