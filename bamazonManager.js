@@ -47,7 +47,7 @@ function viewProduct(){
 	connection.query("SELECT * FROM products", function(error, response){
 
 		for(var i = 0; i < response.length; i++){
-			table.push([res[i].item_id, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity]);
+			table.push([response[i].item_id, response[i].product_name, response[i].department_name, response[i].price, response[i].stock_quantity]);
 		}
 		console.log(table.toString());
 		connection.end();
@@ -63,7 +63,7 @@ function lowInventory(){
 	connection.query("SELECT * FROM products WHERE stock_quantity<5", function(error, response){
 
 		for(var i = 0; i < response.length; i++){
-			table.push([res[i].item_id, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity]);
+			table.push([response[i].item_id, response[i].product_name, response[i].department_name, response[i].price, response[i].stock_quantity]);
 		}
 		console.log(table.toString());
 		connection.end();
@@ -72,7 +72,8 @@ function lowInventory(){
 
 function addNewProduct(){
 	inquirer
-        .prompt([{
+        .prompt([
+            {
                 name: "productName",
                 type: "input",
                 message: "What product is being added?"
@@ -93,22 +94,69 @@ function addNewProduct(){
                 message: "How many are in inventory?"
             }
         ])
-        .then(function(answer) {
+        .then(function(userAnswer) {
             // when finished prompting, insert a new item into the db with that info
             connection.query(
                 "INSERT INTO products SET ?", {
-                    product_name: answer.productName,
-                    department_name: answer.department,
-                    price: answer.price,
-                    stock_quantity: answer.stock
+                    product_name: userAnswer.productName,
+                    department_name: userAnswer.department,
+                    price: userAnswer.price,
+                    stock_quantity: userAnswer.stock
                 },
-                function(err) {
-                    if (err) throw err;
-                    console.log("Your product inventory is created successfully!");
+                function(error) {
+                    if (error) throw error;
+                    console.log("Your new product is created successfully!");
                     connection.end();
                 }
             );
         });
+}
 
+
+function increaseInventory(){
+
+    inquirer
+        .prompt([
+            {
+                name: "productId",
+                type: "input",
+                message: "Enter the ID of the product that is increaseing inventory?"
+            },
+            {
+                name: "stock",
+                type: "input",
+                message: "How many are being added to inventory?"
+            }
+        ])
+        .then(function(userAnswer){
+
+            connection.query(
+                "SELECT stock_quantity FROM products WHERE item_id=?",[userAnswer.productId],
+            function(error, response){
+                console.log(response[0].stock_quantity);
+                var currentStock = parseInt(response[0].stock_quantity);
+            
+            // console.log(currentStock);
+            // console.log(userAnswer.stock);
+
+                connection.query(
+                    "UPDATE products SET ? WHERE ?",
+                [
+                {
+                    stock_quantity: parseInt(userAnswer.stock) + currentStock
+                },
+                {
+                    item_id: userAnswer.productId
+                }
+                ],
+                function(error) {
+                        if (error) throw error;
+                        console.log("Your stock has been updated successfully!");
+                        connection.end();
+                    }
+                );
+            });
+
+        });
 }
 
