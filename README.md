@@ -14,4 +14,4 @@ This command line app will take in orders from customers and deplete stock from 
 
 Screenshots of customer view:
 
-![Alt text](/screenShots?raw=true "Customer View")
+![Alt text](/screenShots/customerView "Customer View")
